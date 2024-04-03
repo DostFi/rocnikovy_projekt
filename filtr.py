@@ -1,22 +1,45 @@
-from PIL import Image
+from PIL import Image, ImageFilter
 
-# Načtení obrázku
-obrazek = Image.open("kitten.jpg")
-sirka, vyska = obrazek.size
+def detekce_okraje(obraz):
+    obraz_odstiny = obraz.convert("L")
+    obraz_okraje = obraz_odstiny.filter(ImageFilter.FIND_EDGES)
+    return obraz_okraje
 
-# Přechod přes každý pixel
-for x in range(sirka):
-    for y in range(vyska):
-        # Získání hodnoty pixelu (R, G, B)
-        r, g, b = obrazek.getpixel((x, y))
-        
-        # Inverze barev
-        new_r = 255 - r
-        new_g = 255 - g
-        new_b = 255 - b
-        
-        # Nastavení nových hodnot pixelu
-        obrazek.putpixel((x, y), (new_r, new_g, new_b))
+while True:
+    obraz = Image.open("opice.jpg")
+    print("Menu editoru fotografií:")
+    print("1. Použít rozmazání")
+    print("2. Použít konturování")
+    print("3. Použít detailní filtr")
+    print("4. Použít zesílení hran")
+    print("5. Použít reliéf")
+    print("6. Použít detekci hran")
+    print("0. Ukončit")
 
-# Zobrazení upraveného obrázku
-obrazek.show()
+    volba = input("Zadejte svou volbu: ")
+
+    if volba == "1":
+        obraz.filter(ImageFilter.BLUR).show()
+        print("Rozmazání použito.")
+    elif volba == "2":
+        obraz.filter(ImageFilter.CONTOUR).show()
+        print("Konturování použito.")
+    elif volba == "3":
+        obraz.filter(ImageFilter.DETAIL).show()
+        print("Detailní filtr použit.")
+    elif volba == "4":
+        obraz.filter(ImageFilter.EDGE_ENHANCE).show()
+        print("Filtr zesílení hran použit.")
+    elif volba == "5":
+        obraz.filter(ImageFilter.EMBOSS).show()
+        print("Filtr reliéfu použit.")
+    elif volba == "6":
+        obraz_okraje = detekce_okraje(obraz)
+        obraz_okraje.show()
+        print("Detekce hran použita.")
+    elif volba == "0":
+        print("Ukončuji...")
+        break
+    else:
+        print("Neplatná volba. Zkuste to znovu.")
+
