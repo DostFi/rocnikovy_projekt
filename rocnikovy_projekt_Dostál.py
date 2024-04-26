@@ -18,7 +18,7 @@ rychlost_posunu = 4
 
 # Načtení obrázků
 pozadí = pygame.image.load('img/bg.png')
-pozemek_obr = pygame.image.load('img/ground.png')
+pozadí_obrázek = pygame.image.load('img/ground.png')
 
 
 class Pták(pygame.sprite.Sprite):
@@ -54,8 +54,8 @@ flappy = Pták(100, int(výška_obrazovky / 2))
 
 pták_skupina.add(flappy)
 
-běh = True
-while běh:
+pokračování = True
+while pokračování:
 
     clock.tick(fps)
 
@@ -66,14 +66,14 @@ while běh:
     pták_skupina.update()
 
     # Kreslení a posun pozadí
-    obrazovka.blit(pozemek_obr, (posun_pozadí,768))
+    obrazovka.blit(pozadí_obrázek, (posun_pozadí,768))
     posun_pozadí -= rychlost_posunu
     if abs(posun_pozadí) > 35:
         posun_pozadí = 0
 
     for událost in pygame.event.get():
         if událost.type == pygame.QUIT:
-            běh = False
+            pokračování = False
     pygame.display.update()
 
 pygame.quit()
