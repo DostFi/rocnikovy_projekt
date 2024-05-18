@@ -15,6 +15,8 @@ pygame.display.set_caption('Flappy Bird')
 # Definování herních proměnných
 posun_pozadí = 0
 rychlost_posunu = 4
+létání = False
+prohra = False
 
 # Načtení obrázků
 pozadí = pygame.image.load('img/bg.png')
@@ -33,19 +35,44 @@ class Pták(pygame.sprite.Sprite):
         self.image = self.obrázky[self.index]
         self.rect = self.image.get_rect()
         self.rect.center = [x, y]
+        self.vel = 0
+        self.clicked = False
 
     def update(self):
+     if létání == True:   
+        #gravitace
+        self.vel += 0.5
+        if self.vel > 8:
+            self.vel = 8
+        if self.rect.bottom < 768:
+            self.rect.y += int(self.vel)
+        if prohra == False:
+            #jump
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                self.clicked = True
+                self.vel = -10
+            if pygame.mouse.get_pressed()[0] == 0:
+                self.clicked = False
 
-        # Animace
-        self.počítadlo += 1
-        prodleva_machání = 5
+            # Animace
+            self.počítadlo += 1
+            prodleva_machání = 5
 
-        if self.počítadlo > prodleva_machání:
-            self.počítadlo = 0
-            self.index += 1
-            if self.index >= len(self.obrázky):
-                self.index = 0
-        self.image = self.obrázky[self.index]  # Update current image
+            if self.počítadlo > prodleva_machání:
+                self.počítadlo = 0
+                self.index += 1
+                if self.index >= len(self.obrázky):
+                    self.index = 0
+            self.image = self.obrázky[self.index]  # Update current image
+
+            #rotace ptáka
+            self.image = pygame.transform.rotate(self.obrázky[self.index], self.vel * -2)
+        else:
+            self.image = pygame.transform.rotate(self.obrázky[self.index], -90)
+
+
+
+
 
 
 pták_skupina = pygame.sprite.Group()
@@ -64,16 +91,25 @@ while pokračování:
 
     pták_skupina.draw(obrazovka)
     pták_skupina.update()
-
-    # Kreslení a posun pozadí
+    #nakreslení země
     obrazovka.blit(pozadí_obrázek, (posun_pozadí,768))
-    posun_pozadí -= rychlost_posunu
-    if abs(posun_pozadí) > 35:
-        posun_pozadí = 0
+
+    # kontrola jestli pták spadnul na zem
+    if flappy.rect.bottom > 768:
+        prohra = True
+        létání = False
+
+    if prohra == False:
+        # Kreslení a posun pozadí
+        posun_pozadí -= rychlost_posunu
+        if abs(posun_pozadí) > 35:
+            posun_pozadí = 0
 
     for událost in pygame.event.get():
         if událost.type == pygame.QUIT:
             pokračování = False
+        if událost.type == pygame.MOUSEBUTTONDOWN and létání == False and prohra == False:
+            létání = True
     pygame.display.update()
 
 pygame.quit()
