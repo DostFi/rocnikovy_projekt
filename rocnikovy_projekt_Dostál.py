@@ -13,6 +13,12 @@ výška_obrazovky = 936
 obrazovka = pygame.display.set_mode((šířka_obrazovky, výška_obrazovky))
 pygame.display.set_caption('Flappy Bird')
 
+# definice fontu
+font = pygame.font.SysFont('Bauhaus 93', 60)
+
+# definice barev
+bílá = (255, 255, 255)
+
 # Definování herních proměnných
 posun_pozadí = 0
 rychlost_posunu = 4
@@ -21,10 +27,18 @@ prohra = False
 trubka_mezera = 150
 trubka_frekvence = 1500 #milisekundy
 poslední_trubka = pygame.time.get_ticks() - trubka_frekvence
+score = 0
+trubka_překonání = False
 
 # Načtení obrázků
 pozadí = pygame.image.load('img/bg.png')
 pozadí_obrázek = pygame.image.load('img/ground.png')
+
+def vykreslení_textu (text, font, text_barva, x, y):
+    obrázek = font.render(text, True, text_barva)
+    obrazovka.blit(obrázek, (x, y))
+
+
 
 
 class Pták(pygame.sprite.Sprite):
@@ -117,6 +131,16 @@ while pokračování:
     #nakreslení země
     obrazovka.blit(pozadí_obrázek, (posun_pozadí,768))
 
+    # kontrola score
+    if len(trubka_skupina) > 0:
+        if pták_skupina.sprites()[0].rect.left > trubka_skupina.sprites()[0].rect.left and pták_skupina.sprites()[0].rect.right < trubka_skupina.sprites()[0].rect.right and trubka_překonání == False:
+            trubka_překonání = True
+        if trubka_překonání == True:
+            if pták_skupina.sprites()[0].rect.left > trubka_skupina.sprites()[0].rect.right:
+                score += 1
+                trubka_překonání = False
+
+    vykreslení_textu(str(score), font, bílá, int(šířka_obrazovky / 2), 20)
     #kolize
     if pygame.sprite.groupcollide(pták_skupina, trubka_skupina, False, False) or flappy.rect.top < 0:
         prohra = True
