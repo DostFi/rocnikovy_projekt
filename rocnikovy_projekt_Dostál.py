@@ -33,12 +33,18 @@ trubka_překonání = False
 # Načtení obrázků
 pozadí = pygame.image.load('img/bg.png')
 pozadí_obrázek = pygame.image.load('img/ground.png')
+tlačítko_obrázek = pygame.image.load('img/restart.png')
 
 def vykreslení_textu (text, font, text_barva, x, y):
     obrázek = font.render(text, True, text_barva)
     obrazovka.blit(obrázek, (x, y))
 
-
+def reset_hry():
+    trubka_skupina.empty()
+    flappy.rect.x = 100
+    flappy.rect.y = int(výška_obrazovky / 2)
+    score = 0
+    return score
 
 
 class Pták(pygame.sprite.Sprite):
@@ -54,39 +60,40 @@ class Pták(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = [x, y]
         self.vel = 0
-        self.clicked = False
+        self.zmáčknuto = False
 
     def update(self):
-     if létání == True:   
-        #gravitace
-        self.vel += 0.5
-        if self.vel > 8:
-            self.vel = 8
-        if self.rect.bottom < 768:
-            self.rect.y += int(self.vel)
-        if prohra == False:
-            #jump
-            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
-                self.clicked = True
-                self.vel = -10
-            if pygame.mouse.get_pressed()[0] == 0:
-                self.clicked = False
+        if létání == True:   
+            # gravitace
+            self.vel += 0.5
+            if self.vel > 8:
+                self.vel = 8
+            if self.rect.bottom < 768:
+                self.rect.y += int(self.vel)
+            if prohra == False:
+                # jump
+                if pygame.mouse.get_pressed()[0] == 1 and self.zmáčknuto == False:
+                    self.zmáčknuto = True
+                    self.vel = -10
+                if pygame.mouse.get_pressed()[0] == 0:
+                    self.zmáčknuto = False
 
-            # Animace
-            self.počítadlo += 1
-            prodleva_machání = 5
+                # Animace
+                self.počítadlo += 1
+                prodleva_machání = 5
 
-            if self.počítadlo > prodleva_machání:
-                self.počítadlo = 0
-                self.index += 1
-                if self.index >= len(self.obrázky):
-                    self.index = 0
-            self.image = self.obrázky[self.index]  # Update current image
+                if self.počítadlo > prodleva_machání:
+                    self.počítadlo = 0
+                    self.index += 1
+                    if self.index >= len(self.obrázky):
+                        self.index = 0
+                self.image = self.obrázky[self.index]
 
-            #rotace ptáka
-            self.image = pygame.transform.rotate(self.obrázky[self.index], self.vel * -2)
-        else:
-            self.image = pygame.transform.rotate(self.obrázky[self.index], -90)
+                # rotace ptáka
+                self.image = pygame.transform.rotate(self.obrázky[self.index], self.vel * -2)
+            else:
+                self.image = pygame.transform.rotate(self.obrázky[self.index], -90)
+
 
 
 
@@ -95,16 +102,41 @@ class Trubka(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('img/pipe.png')
         self.rect = self.image.get_rect()
-        #pozice 1 je z vrchu, -1 ze spodu
+        # pozice 1 je z vrchu, -1 ze spodu
         if pozice == 1:
-           self.image = pygame.transform.flip(self.image, False, True)
-           self.rect.bottomleft = [x, y - int(trubka_mezera / 2)]
+            self.image = pygame.transform.flip(self.image, False, True)
+            self.rect.bottomleft = [x, y - int(trubka_mezera / 2)]
         if pozice == -1:
             self.rect.topleft = [x, y + int(trubka_mezera / 2)]
     def update(self):
         self.rect.x -= rychlost_posunu
         if self.rect.right < 0:
             self.kill()
+
+
+class Tlačítko():
+    def __init__(self, x, y, obrázek):
+        self.obrázek = obrázek
+        self.rect = self.obrázek.get_rect()
+        self.rect.topleft = (x, y)
+
+
+    def vykreslení(self):
+
+        akce = False
+
+        #získání pozice myši
+        pozice_myši = pygame.mouse.get_pos()
+
+        #kontrola jestli myš je nad tlačítkem
+        if self.rect.collidepoint(pozice_myši):
+            if pygame.mouse.get_pressed()[0] == 1:
+                akce = True
+
+        #vykreslení tlačítka
+        obrazovka.blit(self.obrázek, (self.rect.x, self.rect.y))
+
+        return akce
 
 pták_skupina = pygame.sprite.Group()
 trubka_skupina = pygame.sprite.Group()
@@ -114,6 +146,8 @@ flappy = Pták(100, int(výška_obrazovky / 2))
 pták_skupina.add(flappy)
 
 
+#vytvoření instance restartovacího tlačítka
+tlačítko = Tlačítko(šířka_obrazovky // 2 - 50, výška_obrazovky // 2 - 100, tlačítko_obrázek)
 
 
 pokračování = True
@@ -165,6 +199,15 @@ while pokračování:
         if abs(posun_pozadí) > 35:
             posun_pozadí = 0
         trubka_skupina.update()
+
+    # kontrola konce hry a restartu
+    if prohra == True:
+        if tlačítko.vykreslení() == True:
+            prohra = False
+            score = reset_hry()
+
+
+
 
     for událost in pygame.event.get():
         if událost.type == pygame.QUIT:
