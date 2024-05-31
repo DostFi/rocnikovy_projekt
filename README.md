@@ -35,7 +35,7 @@ Tento kód implementuje jednoduchou verzi hry "Flappy Bird" pomocí knihovny Pyg
 - Hra reaguje na kliknutí myší, kdy hráč ovládá skok ptáka.
 
 ### Autor
-- Tento kód byl vytvořen s pomocí Pygame a Pythonu autorem [uváděj jméno autora].
+- Tento kód byl vytvořen s pomocí Pygame a Pythonu autorem Filipem Dostálem.
 
 ### Instalace
 1. Nainstalujte Python a Pygame.
